@@ -6,6 +6,10 @@ body {
     background-color: wheat;
 }
 
+h2 {
+    text-align: center;
+}
+
 #homepage {
     text-align: center;
     padding-top: 50px;

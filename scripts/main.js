@@ -77,7 +77,7 @@ function createScatterplot(data, highlightCylinders, annotationText) {
         .style("opacity", 0);
 
     // Circles
-    svg.selectAll("circle")
+    const circles = svg.selectAll("circle")
         .data(filteredData)
         .enter()
         .append("circle")
@@ -92,6 +92,7 @@ function createScatterplot(data, highlightCylinders, annotationText) {
                 .style("opacity", .9);
             tooltip.html(`
                 <strong>Make:</strong> ${d.Make}<br>
+                <strong>Fuel Type:</strong> ${d.Fuel}<br>
                 <strong>Average City MPG:</strong> ${d.AverageHighwayMPG}<br>
                 <strong>Average Highway MPG:</strong> ${d.AverageCityMPG}
             `)
@@ -104,25 +105,55 @@ function createScatterplot(data, highlightCylinders, annotationText) {
                 .style("opacity", 0);
         });
 
-    // Annotations
-    const meanHighlightedMPG = d3.mean(filteredData, d => d.AverageHighwayMPG);
-    const meanHighlightedX = d3.mean(filteredData, d => d.EngineCylinders);
+    // Annotations with hardcoded values based on the view
+    let annotationX, annotationY, annotationDX, annotationDY;
+
+    if (currentViewIndex === 0) {
+        // Values for the first view (0 cylinders)
+        annotationX = x(0) + 10; // Example value, adjust as needed
+        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG)); // Example value, adjust as needed
+        annotationDX = 20; // Example value, adjust as needed
+        annotationDY = 20; // Example value, adjust as needed
+    } else if (currentViewIndex === 1) {
+        // Values for the second view (0-6 cylinders)
+        annotationX = x(4) + 10; // Example value, adjust as needed
+        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG)); // Example value, adjust as needed
+        annotationDX = 20; // Example value, adjust as needed
+        annotationDY = -20; // Example value, adjust as needed
+    } else if (currentViewIndex === 2) {
+        // Values for the third view (0-12 cylinders)
+        annotationX = x(12) - 10; // Example value, adjust as needed
+        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG)) + 30; // Example value, adjust as needed
+        annotationDX = -20; // Example value, adjust as needed
+        annotationDY = -20; // Example value, adjust as needed
+    }
 
     const annotations = [
         {
             note: { label: annotationText },
-            x: x(meanHighlightedX),
-            y: y(meanHighlightedMPG),
-            dy: -50,
-            dx: 50
+            x: annotationX,
+            y: annotationY,
+            dy: annotationDY,
+            dx: annotationDX
         }
     ];
 
     const makeAnnotations = d3.annotation()
         .annotations(annotations);
 
-    svg.append("g")
-        .call(makeAnnotations);
+    const annotationGroup = svg.append("g")
+        .call(makeAnnotations)
+        .style("opacity", 0); // Set initial opacity to 0
+
+    // Transition the annotations to full opacity
+    annotationGroup.transition()
+        .duration(1000)
+        .style("opacity", 1);
+
+    // Make annotation text black and bold
+    svg.selectAll(".annotation-note-label")
+        .style("fill", "black")
+        .style("font-weight", "bold");
 
     // Legend
     const legendWidth = 180; // Width for legend items
@@ -143,7 +174,18 @@ function createScatterplot(data, highlightCylinders, annotationText) {
     legend.append("rect")
         .attr("width", 18)
         .attr("height", 18)
-        .style("fill", color);
+        .style("fill", color)
+        .on("mouseover", function(event, d) {
+            // Highlight the corresponding circles
+            circles.style("opacity", 0.09); // Fade out all circles
+            circles.filter(circleData => circleData.Make === d) // Highlight matching circles
+                .style("opacity", 1)
+                .style("stroke", "black");
+        })
+        .on("mouseout", function() {
+            // Reset the circle opacity
+            circles.style("opacity", 1).style("stroke", "none");
+        });
 
     legend.append("text")
         .attr("x", 20)
@@ -155,9 +197,9 @@ function createScatterplot(data, highlightCylinders, annotationText) {
 
 // Array of views with cylinder count ranges
 const views = [
-    { cylinders: [0], annotation: "Cars with 0 cylinders have a significantly larger peak in average highway MPG." },
-    { cylinders: [0, 1, 2, 3, 4, 5, 6], annotation: "Cars with engine cylinders from 0 to 6 have varying MPG, with 0 cylinders having the highest." },
-    { cylinders: [0, 1, 2, 3, 4, 5, 6, 8, 10, 12], annotation: "Cars with engine cylinders from 0 to 12 show a range of MPG, with higher cylinders typically having lower MPG." }
+    { cylinders: [0], annotation: "All cars with 0 cylinders are electric in the data. Cars with 0 cylinders also have the highest average MPG on the highway." },
+    { cylinders: [0, 1, 2, 3, 4, 5, 6], annotation: "Cars with greater than 0 cylinders are all gasoline. There is a steep and significant drop in average MPG on the highway. A large portion of vehicles in the data set also seem to have 4 engine cylinders." },
+    { cylinders: [0, 1, 2, 3, 4, 5, 6, 8, 10, 12], annotation: "As we reach 12 cylinders, we see the lowest average amount of MPG on the highway in these cars. It can also be said that these car manufacturers are usually stated to be more luxurious. The graph overall highlights an exponential drop in MPG on the highway as the number of engine cylinders increases linearly." }
 ];
 
 let currentViewIndex = 0;
@@ -166,6 +208,7 @@ let currentViewIndex = 0;
 d3.csv("./data/cars.csv").then(data => {
     data.forEach(d => {
         d.Make = d.Make;
+        d.Fuel = d.Fuel;
         d.EngineCylinders = +d.EngineCylinders;
         d.AverageHighwayMPG = +d.AverageHighwayMPG;
         d.AverageCityMPG = +d.AverageCityMPG; // Make sure this field is included
