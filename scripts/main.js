@@ -78,7 +78,7 @@ function createChart(svgId, data, xAttr, yAttr, title) {
 }
 
 // Load data and create charts
-d3.csv("data/data.csv").then(data => {
+d3.csv("data/cars.csv").then(data => {
     data.forEach(d => {
         d.engine_cylinders = +d.engine_cylinders;
         d.average_highway_mpg = +d.average_highway_mpg;
