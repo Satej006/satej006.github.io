@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Narrative Visualization</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="./styles/styles.css">
 </head>
 <body>
-    <div id="highway-chart"></div>
-    <div id="city-chart"></div>
-    <div id="combined-chart"></div>
-
-    <!-- D3.js Library -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <!-- D3-Annotation Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.5.1/d3-annotation.min.js"></script>
-    <script src="scripts/main.js"></script>
+    <div id="homepage">
+        <h1>Narrative Visualization</h1>
+        <p>In this narrative visualization, I hope to explore the correlation between the miles per gallon
+            of a car on the highway and the number of engine cylinders.</p>
+        <p>I will be using a dataset that contains information about various cars, including the make, fuel
+            type, number of engine cylinders, and the average miles per gallon for both city and highway driving.</p>
+        <p>Click the button below to start the slideshow and explore the data!</p>
+        <button id="start-button">Start Slideshow</button>
+    </div>
+    <script>
+        document.getElementById('start-button').addEventListener('click', function() {
+            window.location.href = 'graph.html';
+        });
+    </script>
 </body>
 </html>
