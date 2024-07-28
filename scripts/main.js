@@ -1,7 +1,7 @@
 // Set up the SVG canvas dimensions
 const margin = { top: 40, right: 350, bottom: 50, left: 60 }; // Increased right margin for legend
-const width = 1000 - margin.left - margin.right; // Increased width
-const height = 600 - margin.top - margin.bottom; // Increased height
+const width = 1000 - margin.left - margin.right;
+const height = 600 - margin.top - margin.bottom;
 
 // Function to generate a custom color palette
 function generateColors(numColors) {
@@ -12,7 +12,7 @@ function generateColors(numColors) {
     return colors;
 }
 
-// Function to create the scatterplot with highlighting and annotations
+// Function to create the scatterplot with tooltips, annotations, and highlighting
 function createScatterplot(data, highlightCylinders, annotationText) {
     d3.select("#chart").select("svg").remove(); // Remove the previous chart
 
@@ -28,10 +28,10 @@ function createScatterplot(data, highlightCylinders, annotationText) {
 
     // Scales
     const x = d3.scaleLinear()
-        .domain([-1, 13]) // Fixed x-axis domain from -1 to 13
+        .domain([-1, 13])
         .range([0, width]);
     const y = d3.scaleLinear()
-        .domain([0, d3.max(filteredData, d => d.AverageHighwayMPG) + 5])
+        .domain([0, d3.max(filteredData, d => d.AverageHighwayMPG) + 10])
         .range([height, 0]);
 
     // Color scale with custom colors
@@ -44,8 +44,8 @@ function createScatterplot(data, highlightCylinders, annotationText) {
     svg.append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x)
-            .ticks(7) // This determines the number of ticks displayed
-            .tickValues(d3.range(0, 14, 2)) // Show every other value from -1 to 13
+            .ticks(7)
+            .tickValues(d3.range(0, 14, 2))
         );
     svg.append("g")
         .call(d3.axisLeft(y).ticks(5));
@@ -85,7 +85,7 @@ function createScatterplot(data, highlightCylinders, annotationText) {
         .attr("cy", d => y(d.AverageHighwayMPG))
         .attr("r", 5)
         .style("fill", d => color(d.Make))
-        .style("opacity", 1) // No need for opacity based on highlightCylinders now
+        .style("opacity", 1)
         .on("mouseover", function(event, d) {
             tooltip.transition()
                 .duration(200)
@@ -105,27 +105,27 @@ function createScatterplot(data, highlightCylinders, annotationText) {
                 .style("opacity", 0);
         });
 
-    // Annotations with hardcoded values based on the view
+    // Annotations based on the current view
     let annotationX, annotationY, annotationDX, annotationDY;
 
     if (currentViewIndex === 0) {
-        // Values for the first view (0 cylinders)
-        annotationX = x(0) + 10; // Example value, adjust as needed
-        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG)); // Example value, adjust as needed
-        annotationDX = 20; // Example value, adjust as needed
-        annotationDY = 20; // Example value, adjust as needed
+        // Values for the first view
+        annotationX = x(0) + 10;
+        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG));
+        annotationDX = 20;
+        annotationDY = 20;
     } else if (currentViewIndex === 1) {
-        // Values for the second view (0-6 cylinders)
-        annotationX = x(4) + 10; // Example value, adjust as needed
-        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG)); // Example value, adjust as needed
-        annotationDX = 20; // Example value, adjust as needed
-        annotationDY = -20; // Example value, adjust as needed
+        // Values for the second view
+        annotationX = x(4) + 10;
+        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG));
+        annotationDX = 20;
+        annotationDY = -20;
     } else if (currentViewIndex === 2) {
-        // Values for the third view (0-12 cylinders)
-        annotationX = x(12) - 10; // Example value, adjust as needed
-        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG)) + 30; // Example value, adjust as needed
-        annotationDX = -20; // Example value, adjust as needed
-        annotationDY = -20; // Example value, adjust as needed
+        // Values for the third view
+        annotationX = x(12) - 10;
+        annotationY = y(d3.mean(filteredData, d => d.AverageHighwayMPG)) + 30;
+        annotationDX = -20;
+        annotationDY = -20;
     }
 
     const annotations = [
@@ -143,31 +143,28 @@ function createScatterplot(data, highlightCylinders, annotationText) {
 
     const annotationGroup = svg.append("g")
         .call(makeAnnotations)
-        .style("opacity", 0); // Set initial opacity to 0
+        .style("opacity", 0);
 
-    // Transition the annotations to full opacity
     annotationGroup.transition()
         .duration(1000)
         .style("opacity", 1);
 
-    // Make annotation text black and bold
     svg.selectAll(".annotation-note-label")
         .style("fill", "black")
         .style("font-weight", "bold");
 
     // Legend
-    const legendWidth = 180; // Width for legend items
-    const legendHeight = 20; // Height for legend items
-    const legendSpacing = 25; // Spacing between items
-    const itemsPerColumn = 22; // Number of items per column
+    const legendWidth = 180;
+    const legendHeight = 20;
+    const itemsPerColumn = 22;
 
     const legend = svg.selectAll(".legend")
         .data(color.domain())
         .enter().append("g")
         .attr("class", "legend")
         .attr("transform", (d, i) => {
-            const column = Math.floor(i / itemsPerColumn); // Determine column
-            const row = i % itemsPerColumn; // Determine row within column
+            const column = Math.floor(i / itemsPerColumn);
+            const row = i % itemsPerColumn;
             return `translate(${width + 10 + column * legendWidth},${row * legendHeight})`;
         });
 
@@ -176,14 +173,12 @@ function createScatterplot(data, highlightCylinders, annotationText) {
         .attr("height", 18)
         .style("fill", color)
         .on("mouseover", function(event, d) {
-            // Highlight the corresponding circles
-            circles.style("opacity", 0.09); // Fade out all circles
-            circles.filter(circleData => circleData.Make === d) // Highlight matching circles
+            circles.style("opacity", 0.09);
+            circles.filter(circleData => circleData.Make === d)
                 .style("opacity", 1)
                 .style("stroke", "black");
         })
         .on("mouseout", function() {
-            // Reset the circle opacity
             circles.style("opacity", 1).style("stroke", "none");
         });
 
@@ -195,7 +190,7 @@ function createScatterplot(data, highlightCylinders, annotationText) {
         .text(d => d);
 }
 
-// Array of views with cylinder count ranges
+// Array of views with cylinder count ranges and annotations
 const views = [
     { cylinders: [0], annotation: "All cars with 0 cylinders are electric in the data. Cars with 0 cylinders also have the highest average MPG on the highway." },
     { cylinders: [0, 1, 2, 3, 4, 5, 6], annotation: "Cars with greater than 0 cylinders are all gasoline. There is a steep and significant drop in average MPG on the highway. A large portion of vehicles in the data set also seem to have 4 engine cylinders." },
@@ -204,24 +199,26 @@ const views = [
 
 let currentViewIndex = 0;
 
-// Load data and set up event listeners for buttons
+// Load data
 d3.csv("./data/cars.csv").then(data => {
     data.forEach(d => {
         d.Make = d.Make;
         d.Fuel = d.Fuel;
         d.EngineCylinders = +d.EngineCylinders;
         d.AverageHighwayMPG = +d.AverageHighwayMPG;
-        d.AverageCityMPG = +d.AverageCityMPG; // Make sure this field is included
+        d.AverageCityMPG = +d.AverageCityMPG;
     });
 
     function updateView(index) {
         createScatterplot(data, views[index].cylinders, views[index].annotation);
     }
 
+    // Set up event listener for homepage button
     document.getElementById("back-home").addEventListener("click", () => {
-        window.location.href = 'index.html'; // Redirect to the homepage
+        window.location.href = 'index.html';
     });
 
+    // Set up event listener for previous button
     document.getElementById("previous").addEventListener("click", () => {
         if (currentViewIndex > 0) {
             currentViewIndex--;
@@ -229,6 +226,7 @@ d3.csv("./data/cars.csv").then(data => {
         }
     });
 
+    // Set up event listener for next button
     document.getElementById("next").addEventListener("click", () => {
         if (currentViewIndex < views.length - 1) {
             currentViewIndex++;
