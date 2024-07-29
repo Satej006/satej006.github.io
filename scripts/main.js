@@ -93,8 +93,8 @@ function createScatterplot(data, highlightCylinders, annotationText) {
             tooltip.html(`
                 <strong>Make:</strong> ${d.Make}<br>
                 <strong>Fuel Type:</strong> ${d.Fuel}<br>
-                <strong>Average City MPG:</strong> ${d.AverageHighwayMPG}<br>
-                <strong>Average Highway MPG:</strong> ${d.AverageCityMPG}
+                <strong>Average Highway MPG:</strong> ${d.AverageHighwayMPG}<br>
+                <strong>Average City MPG:</strong> ${d.AverageCityMPG}
             `)
                 .style("left", (event.pageX + 5) + "px")
                 .style("top", (event.pageY - 28) + "px");
