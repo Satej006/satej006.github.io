@@ -1,3 +1,6 @@
+# Deployed Webpage: https://satej006.github.io/
+# Original Dataset: https://flunky.github.io/cars2017.csv
+
 # Narrative Visualization Essay
 The message I want to convey with my narrative visualization is the relationship between engine cylinder count and average highway miles per gallon for various car manufacturers. By using a series of scatterplots, my goal is to illustrate how increasing engine cylinder counts generally lead to decreased average highway miles per gallon, providing insights into the impact of engine size on fuel efficiency.
 
